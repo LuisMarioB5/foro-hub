@@ -1,0 +1,7 @@
+package com.bonidev.foro_hub.errors;
+
+public class ParseException extends RuntimeException {
+    public ParseException(String message) {
+        super(message);
+    }
+}
