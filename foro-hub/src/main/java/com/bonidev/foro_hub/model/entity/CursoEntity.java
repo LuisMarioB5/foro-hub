@@ -2,16 +2,14 @@ package com.bonidev.foro_hub.model.entity;
 
 import com.bonidev.foro_hub.model.enums.CategoriaEnum;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "cursos")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @EqualsAndHashCode(of = "id")
 public class CursoEntity {
     @Id

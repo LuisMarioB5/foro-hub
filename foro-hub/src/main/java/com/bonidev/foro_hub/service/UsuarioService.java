@@ -1,4 +1,4 @@
-package com.bonidev.foro_hub.security.service;
+package com.bonidev.foro_hub.service;
 
 import com.bonidev.foro_hub.security.dto.AutenticacionDTO;
 import com.bonidev.foro_hub.model.entity.UsuarioEntity;
@@ -20,7 +20,7 @@ public class UsuarioService {
     }
 
     public UsuarioEntity save(AutenticacionDTO dto) {
-        return repository.save(new UsuarioEntity(dto.email(), dto.password()));
+        return repository.save(new UsuarioEntity(dto.login(), dto.clave()));
     }
 
     public UsuarioEntity findById(Long id) {

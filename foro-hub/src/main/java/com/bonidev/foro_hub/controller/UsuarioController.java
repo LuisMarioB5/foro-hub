@@ -1,9 +1,9 @@
-package com.bonidev.foro_hub.security.controller;
+package com.bonidev.foro_hub.controller;
 
 import com.bonidev.foro_hub.security.dto.AutenticacionDTO;
 import com.bonidev.foro_hub.model.entity.UsuarioEntity;
 import com.bonidev.foro_hub.security.dto.UsuarioDTO;
-import com.bonidev.foro_hub.security.service.UsuarioService;
+import com.bonidev.foro_hub.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

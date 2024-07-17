@@ -1,5 +1,6 @@
 package com.bonidev.foro_hub.security.config;
 
+import com.bonidev.foro_hub.errors.ResourceNotFoundException;
 import com.bonidev.foro_hub.security.service.TokenService;
 import com.bonidev.foro_hub.security.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
@@ -35,9 +36,10 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             var email = tokenService.getSubject(token);
             if (email != null) {
-                var usuario = usuarioRepository.findByEmail(email);
+                var usuario = usuarioRepository.findByEmail(email)
+                        .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
 
-                var authUser = new UsernamePasswordAuthenticationToken(usuario.getUsername(), null, usuario.getAuthorities());
+                var authUser = new UsernamePasswordAuthenticationToken(usuario, null,  usuario.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authUser);
             }
         }
@@ -45,4 +47,3 @@ public class SecurityFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-

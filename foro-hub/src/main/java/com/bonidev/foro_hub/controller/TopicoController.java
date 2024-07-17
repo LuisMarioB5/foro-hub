@@ -5,6 +5,8 @@ import com.bonidev.foro_hub.model.dto.topico.GuardarTopicoDTO;
 import com.bonidev.foro_hub.model.dto.topico.MostrarTopicoDTO;
 import com.bonidev.foro_hub.model.entity.TopicoEntity;
 import com.bonidev.foro_hub.model.enums.StatusEnum;
+import com.bonidev.foro_hub.repository.CursoRepository;
+import com.bonidev.foro_hub.security.repository.UsuarioRepository;
 import com.bonidev.foro_hub.service.TopicoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +25,14 @@ import java.time.LocalDateTime;
 @RequestMapping("/topicos")
 public class TopicoController {
     private final TopicoService service;
+    private final UsuarioRepository usuarioRepository;
+    private final CursoRepository cursoRepository;
 
     @Autowired
-    public TopicoController(TopicoService service) {
+    public TopicoController(TopicoService service, UsuarioRepository usuarioRepository, CursoRepository cursoRepository) {
         this.service = service;
+        this.usuarioRepository = usuarioRepository;
+        this.cursoRepository = cursoRepository;
     }
 
     @PostMapping
@@ -37,7 +43,8 @@ public class TopicoController {
         }
 
         TopicoEntity topico = new TopicoEntity(dto.titulo(), dto.mensaje(), LocalDateTime.now(), StatusEnum.EN_PROGRESO, dto.autor(), dto.curso());
-
+        usuarioRepository.save(dto.autor());
+        cursoRepository.save(dto.curso());
         service.save(topico);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()

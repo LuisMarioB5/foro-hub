@@ -15,10 +15,10 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
     private final String JWT_SECRET = System.getenv("JWT_SECRET");
+    private final Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
 
     public String generarToken(UsuarioEntity usuario) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
             return JWT.create()
                     .withIssuer("Foro Hub")
                     .withSubject(usuario.getEmail())
@@ -41,7 +41,6 @@ public class TokenService {
 
         DecodedJWT decodedJWT = null;
         try {
-            Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
             decodedJWT = JWT.require(algorithm)
                     .withIssuer("Foro Hub")
                     .build()

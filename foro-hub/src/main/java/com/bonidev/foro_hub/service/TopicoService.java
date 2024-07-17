@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -32,6 +33,7 @@ public class TopicoService {
         this.cursoRepository = cursoRepository;
     }
 
+    @Transactional
     public void save (TopicoEntity topico) {
         repository.save(topico);
     }
@@ -69,28 +71,51 @@ public class TopicoService {
         TopicoEntity topico = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tópico no encontrado con id: " + id));
 
+        // Actualizar título y mensaje del tópico
         topico.setTitulo(guardarTopicoDTO.titulo());
         topico.setMensaje(guardarTopicoDTO.mensaje());
 
-        if (!topico.getAutor().getId().equals(guardarTopicoDTO.autor().getId())) {
-            UsuarioEntity nuevoAutor = userrepository.findById(guardarTopicoDTO.autor().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + guardarTopicoDTO.autor().getId()));
-            topico.setAutor(nuevoAutor);
+        // Verificar y actualizar el autor si es necesario
+        UsuarioEntity nuevoAutor = guardarTopicoDTO.autor();
+        if (nuevoAutor != null && nuevoAutor.getId() != null) {
+            System.out.println("hola");
+            UsuarioEntity autorPersistido = userrepository.findById(nuevoAutor.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Autor (usuario) no encontrado con id: " + nuevoAutor.getId()));
+
+            if (!Objects.equals(autorPersistido.getNombre(), nuevoAutor.getNombre())
+                    || !Objects.equals(autorPersistido.getEmail(), nuevoAutor.getEmail())
+                    || !Objects.equals(autorPersistido.getPassword(), nuevoAutor.getPassword())) {
+                autorPersistido.setNombre(nuevoAutor.getNombre());
+                autorPersistido.setEmail(nuevoAutor.getEmail());
+                autorPersistido.setPassword(nuevoAutor.getPassword());
+
+                userrepository.save(autorPersistido);
+            }
+
+            // Actualizar el autor del tópico
+            topico.setAutor(autorPersistido);
         }
 
-        if (!topico.getCurso().getId().equals(guardarTopicoDTO.curso().getId())) {
-            CursoEntity nuevoCurso = cursoRepository.findById(guardarTopicoDTO.curso().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Curso no encontrado con id: " + guardarTopicoDTO.curso().getId()));
-            topico.setCurso(nuevoCurso);
+        // Verificar y actualizar el curso si es necesario
+        CursoEntity nuevoCurso = guardarTopicoDTO.curso();
+        if (nuevoCurso != null && nuevoCurso.getId() != null) {
+            CursoEntity cursoPersistido = cursoRepository.findById(nuevoCurso.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Curso no encontrado con id: " + nuevoCurso.getId()));
+
+            // Comparar propiedades relevantes y actualizar si es necesario
+            if (!Objects.equals(cursoPersistido.getNombre(), nuevoCurso.getNombre())
+                    || !Objects.equals(cursoPersistido.getCategoria(), nuevoCurso.getCategoria())) {
+                cursoPersistido.setNombre(nuevoCurso.getNombre());
+                cursoPersistido.setCategoria(nuevoCurso.getCategoria());
+
+                cursoRepository.save(cursoPersistido);
+            }
+
+            // Actualizar el curso del tópico
+            topico.setCurso(cursoPersistido);
         }
 
-        if (!topico.getAutor().equals(guardarTopicoDTO.autor())) {
-            userrepository.save(topico.getAutor());
-        }
-        if (!topico.getCurso().equals(guardarTopicoDTO.curso())) {
-            cursoRepository.save(topico.getCurso());
-        }
-
+        // Guardar los cambios en el tópico
         topico = repository.save(topico);
 
         return new MostrarTopicoDTO(
@@ -102,6 +127,8 @@ public class TopicoService {
                 topico.getCurso()
         );
     }
+
+
 
     public void eliminarTopico(Long id) {
         TopicoEntity topico = repository.findById(id)
